@@ -128,7 +128,6 @@ var icons = {
     icon: "ion-minus-circled",
     //icon: "fas fa-democrat",
     iconColor: "white",
-    //markerColor: "blue-dark",
     markerColor: "blue-dark",
     shape: "penta"
   }),
@@ -146,16 +145,7 @@ var icons = {
     iconColor: "white",
     markerColor: "blue",
     shape: "circle"
-  }),
-    //NORMAL: L.ExtraMarkers.icon({
-      EARTH: L.ExtraMarkers.icon({
-        icon: "ion-android-bicycle",
-        //iconUrl: "piruz.jpg",
-        iconSize:     [38, 34], // size of the icon
-        iconColor: "white",
-        markerColor: "white",
-        shape: "circle"
-      })
+  })
 };
 //  ------------------------------------------------------------------------------------------------
 //  This section reads the Json output of AlemiMerge2 program
@@ -252,6 +242,8 @@ d3.json("https://gbfs.citibikenyc.com/gbfs/en/station_information.json", functio
       //                  Add the new marker to the appropriate layer
       // ------------------------------------------------------------------------------------
       newMarker.addTo(layers[stationStatusCode]);
+      // layers2 for earthquakes and not bycicles
+      newMarker.addTo(layers2[stationStatusCode]);
       
 
       // Bind a popup to the marker that will  display on click. This will be rendered as HTML
@@ -279,9 +271,9 @@ function updateLegend(time, stationCount, earthCount) {
     "<p class='healthy'>Normal: " + stationCount.NORMAL + "</p>",
 
     "<p class='low'>---------------------- " + " " + "</p>",
-    "<p class='coming-soon'>Major Earth quakes: " + earthCount.COMING_SOON + "</p>",
-    "<p class='low'>Low mag earthquake: " + earthCount.LOW + "</p>",
-    "<p class='healthy'>Midium size earthQuake: " + earthCount.NORMAL + "</p>"
+    "<p class='coming-soon'>Major earthquakes: " + earthCount.COMING_SOON + "</p>",
+    "<p class='low'>Low mag earthquakes: " + earthCount.LOW + "</p>",
+    "<p class='healthy'>Midium size earthQuakes: " + earthCount.NORMAL + "</p>"
   ].join("");
 }
 
@@ -360,7 +352,7 @@ function createFeatures(eqData) {
       var eachEq = eqData[i];
       // console.log(eachEq.properties)
       // If eachEq is coming soon
-      if (!eachEq.properties.mag < 10) {
+      if (!eachEq.properties.mag > 7) {
         console.log(eachEq.properties.mag)
         earthStatusCode = "COMING_SOON";
       }
@@ -369,7 +361,7 @@ function createFeatures(eqData) {
         earthStatusCode = "EMPTY";
       }
       // If eachEq has less is less than 1.5, it's status is low
-      else if (eachEq.properties.mag < 1.5) {
+      else if (eachEq.properties.mag > 6) {
         earthStatusCode = "LOW";
       }
       // Otherwise the eachEq is normal
@@ -399,11 +391,6 @@ function createFeatures(eqData) {
   function onEachFeature1(feature, layer) {
     layer.bindPopup("<h3>" + feature.properties.place +
       "</h3><hr><p>" + new Date(feature.properties.time) + "</p>");
-      if (feature.properties.mag > 6){
-        layer.setIcon(icons["EARTH"]);
-      }
-      //layer.setIcon(icons["EARTH"]);
-    //layer.addTo(earthquakes);
   }
 
  
@@ -420,7 +407,6 @@ function createFeatures(eqData) {
   // --------------------------------------------------------------------------------------------------
   //                        Sending our earthquakes layer to the createMap function
   // -------------------------------------------------------------------------------------------------
-  // newMarker.addTo(layers[stationStatusCode]);
   createMap(earthquakes);
   console.log("earthquakes:........:",earthquakes)
 }
@@ -442,10 +428,10 @@ function createFeatures(eqData) {
 
       function onEachFeature2(feature, layer) {
         layer.bindPopup("<h3>" + feature.geometry.coordinates +
-          "</h3><hr><p>" + " " + "</p>");
-          console.log("bind poly coordinates3?")
+          "</h3><hr><p>" + feature.properties.Name + "</p>");
+         // console.log("bind poly coordinates3?")
       }
-          console.log("bind poly coordinates4?")
+         // console.log("bind poly coordinates4?")
       // --------------------------------------------------------------------------------------------------
       //    Create a GeoJSON layer containing the features array on the polyData object
       //    Run the onEachFeature function once for each piece of data in the array
@@ -509,7 +495,7 @@ function createMap(earthquakes) {
   //                1. Create a layer control
   //                2. Pass in our baseMaps and overlayMaps
   //                3. Add the layer control to the map
-  // Note: We have multiple overlay maps, without a switch box
+  // Note: We have multiple overlay maps, with and without switch boxes
   // -------------------------------------------------------------------
   console.log("Wow baseMaps + overlayMaps?")
   console.log(earthquakes)
